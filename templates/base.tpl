@@ -92,8 +92,12 @@
 							<div class='copyright'>
 								<p>
 									2014 - version 1.0. Created by Cécile Germain, Julien Nauroy and Karima Rafes.
-									Web interface based on the <a href="https://github.com/NielsLeenheer/html5test">GitHub repository</a> of <a href="http://html5test.com/">HTML5TEST.</a>
-									Please note that the SPARQLScore test is not affiliated with the W3C working group.
+									Web interface based on the <a href="https://github.com/NielsLeenheer/html5test">GitHub repository</a> of <a href="http://html5test.com/">HTML5TEST</a>.<br />
+									This website is itself available <a href="https://github.com/JulienNauroy/SPARQLScore">through GitHub</a>.<br />
+									Please note that the SPARQLScore test is not affiliated with the W3C working group.<br />
+									Sponsors: <br />
+									<a href="http://www.inria.fr"><img src="images/inriauk.png" alt="Inria" height="80" /></a>
+									<a href="http://www.grid-observatory.org"><img src="images/gridobs.png" alt="The Grid Observatory" height="80" /></a>
 								</p>
 							</div>
 						</div>
