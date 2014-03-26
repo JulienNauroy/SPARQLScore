@@ -28,13 +28,12 @@ function downloadTestGraphs(endpoint) {
 	req.send(null); 
 }
 
-// Retrieve the results of a test given the endpoint and graph containing it
-function downloadResults(endpoint, graph) {
-	endpoint = typeof endpoint !== 'undefined' ? endpoint : "";
+// Retrieve the results of a test given graph containing it
+function downloadResults(graph) {
 	graph = typeof graph !== 'undefined' ? graph : "";
 	
 	//send request
-	var URL = "ajax_testResults.php?endpoint="+endpoint+"&graph="+graph;
+	var URL = "ajax_testResults.php?graph="+graph;
 	var req = new XMLHttpRequest();
 	req.open("GET", URL, true); 
 	req.onreadystatechange = function (aEvt) {

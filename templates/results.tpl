@@ -8,7 +8,7 @@
 		<script>
 		<!--
 			// Download results of a previous test
-			downloadResults("{$endpoint}", "{$graph}");
+			downloadResults("{$graph}");
 
 			// Wait for its results and call onTestsOK when they are received
 			function waitForResults(cb) {

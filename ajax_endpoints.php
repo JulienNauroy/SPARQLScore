@@ -2,8 +2,9 @@
 header("Content-Type: text/json");
 require_once "libs/easyrdf-0.8.0/lib/EasyRdf.php";
 
+$config = require_once("config.inc.php");
 // This is the official endpoint
-$endpoint = "http://dev.grid-observatory.org:3030/tests/query";
+$endpoint = $config->defaultEndpoint;
 
 EasyRdf_Namespace::set('sd', 'http://www.w3.org/ns/sparql-service-description#');
 EasyRdf_Namespace::set('git', 'http://www.w3.org/ns/git#');
