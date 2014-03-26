@@ -1,7 +1,6 @@
 <?php
 require_once "libs/Smarty-3.1.16/libs/Smarty.class.php";
 require_once "libs/easyrdf-0.8.0/lib/EasyRdf.php";
-
 header("Content-Type: text/json");
 
 $config = require_once("config.inc.php");
@@ -16,11 +15,10 @@ $smarty->setCompileDir('./templates/compile/');
 $smarty->setCaching(Smarty::CACHING_LIFETIME_CURRENT);
 
 
-// Retrieve the endpoint and graph
-$endpoint = @$_GET["endpoint"];
+$endpoint = $config->defaultEndpoint;
+// Retrieve the graph
 $graph = @$_GET["graph"];
 // Values MUST be provided by index.php
-if($endpoint == "") die();
 if($graph == "") die();
 
 
@@ -33,8 +31,16 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 	$output->software->serverVersion = "";
 	$output->software->testerName = "";
 	$output->software->testerVersion = "";
-	$output->tests = array();
-
+	
+	/*
+	PREFIX mf: <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
+	PREFIX earl: <http://www.w3.org/ns/earl#>
+	PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+	PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+	PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
+	PREFIX sq: <http://sparqlscore.net/Score#>
+	PREFIX git: <http://www.w3.org/ns/git#>
+	*/
 	EasyRdf_Namespace::set('mf', 'http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#');
 	EasyRdf_Namespace::set('earl', 'http://www.w3.org/ns/earl#');
 	EasyRdf_Namespace::set('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
@@ -60,7 +66,6 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 	}
 	");
 
-
 	foreach ($result as $row) {
 		$output->software->serverName = $row->serverName->getValue();
 		$output->software->serverVersion = $row->serverVersion->getValue();
@@ -68,9 +73,45 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 		$output->software->testerVersion = $row->testerVersion->getValue();
 	}
 
+	// Construct the subquery for the test suites
+	$tsSubqueries = array();
+	foreach($config->defaultTestSuites as $ts) {
+		$tsSubqueries[] = "
+		{
+			GRAPH <$ts> {
+				# Find the name for this test suite
+				?manifestall a mf:Manifest ;
+					rdfs:label ?label ;
+					mf:include ?includes. # Only the global manifest has a mf:include predicate
+				# Find the categories, their names and the associated tests
+				?categoryIRI rdfs:label ?categoryName ;
+					mf:conformanceRequirement ?list.
+				?list rdf:rest*/rdf:first ?ttlTests .
+				?ttlTests mf:entries ?entries .
+				?entries rdf:rest*/rdf:first ?test.
+				?test mf:name ?testName.
+			}
+			GRAPH <$graph> {
+				# Find all the tests and assertions
+				?assertion a earl:Assertion.
+				?assertion earl:test ?test.
+				?assertion rdf:label ?assertionName.
+				?assertion earl:result ?result.
+				?result earl:date ?date.
+				OPTIONAL {?result earl:duration ?duration.}
+				?result earl:outcome ?outcome.
+				#?categoryIRI sq:totalTest ?totalTest ;
+				#			 sq:scoreTest ?score.
+							 
+			}
+		}\n";
+	}
+	// Concatenate all the subqueries
+	$tsSubquery = join("\t\tUNION \n", $tsSubqueries);
 
-	// Retrieve the test results
-	$result = $sparql->query("
+
+	// Construct the query
+	$queryStr = "
 	CONSTRUCT {
 		?manifestall a earl:testSuite ; # We've just invented this one
 		             rdfs:label ?label ;
@@ -84,34 +125,11 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 		?assertion rdf:label ?assertionName ;
 		           earl:outcome ?outcome.
 	} WHERE {
-		GRAPH <http://dev.grid-observatory.org/sparql11-test-suite/> {
-			# Find the name for this test suite
-			?manifestall a mf:Manifest ;
-				rdfs:label ?label ;
-				mf:include ?includes. # Only the global manifest has a mf:include predicate
-			# Find the categories, their names and the associated tests
-			?categoryIRI rdfs:label ?categoryName ;
-							 mf:conformanceRequirement ?list.
-					?list rdf:rest*/rdf:first ?ttlTests .
-					?ttlTests mf:entries ?entries .
-					?entries rdf:rest*/rdf:first ?test.
-					?test mf:name ?testName.
-		}
-		GRAPH <$graph> {
-			# Find all the tests and assertions
-			?assertion a earl:Assertion.
-			?assertion earl:test ?test.
-			?assertion rdf:label ?assertionName.
-			?assertion earl:result ?result.
-			?result earl:date ?date.
-			OPTIONAL {?result earl:duration ?duration.}
-			?result earl:outcome ?outcome.
-			#?categoryIRI sq:totalTest ?totalTest ;
-			#			 sq:scoreTest ?score.
-						 
-		}
+		$tsSubquery
 	}
-	");
+	";
+	// Run the query and retrieve the test results
+	$result = $sparql->query($queryStr);
 
 	// List all test suites
 	$testSuites = $result->resourcesMatching("earl:testCategory");
@@ -129,7 +147,7 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 
 		foreach($categories as $category) {
 			$currentCategory = new stdClass();
-			$currentCategory->id = "category" . sizeof($tsNode->items);
+			$currentCategory->id = $tsNode->id . "_category" . sizeof($tsNode->items);
 			$currentCategory->name = $category->getLiteral("rdf:label")->getValue();
 			$currentCategory->items = array();
 			$tsNode->items[] = $currentCategory;
@@ -139,7 +157,7 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 
 			foreach($tests as $test) {
 				$testItem = new stdClass();
-				$testItem->id = "testItem" . sizeof($currentCategory->items);
+				$testItem->id = $currentCategory->id . "_testItem" . sizeof($currentCategory->items);
 				$testItem->name = $test->getLiteral("rdf:label")->getValue();
 				$testItem->items = array();
 

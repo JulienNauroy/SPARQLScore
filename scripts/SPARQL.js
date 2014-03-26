@@ -47,7 +47,6 @@ function downloadResults(graph) {
 				var output = JSON.parse(req.responseText);
 				// Instantiate the tests and set the results
 				t = new Tests();
-				t.endpoint = endpoint;
 				t.graph = graph;
 				t.tests = output.tests;
 				t.serverName = output.software.serverName;
