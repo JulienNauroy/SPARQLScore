@@ -1,7 +1,10 @@
 <?php
 require_once "libs/Smarty-3.1.16/libs/Smarty.class.php";
 require_once "libs/easyrdf-0.8.0/lib/EasyRdf.php";
-error_reporting(E_ALL);
+
+$config = require_once("config.inc.php");
+// This is the official endpoint
+$endpoint = $config->defaultEndpoint;
 
 header("Content-Type: text/json");
 
@@ -10,16 +13,13 @@ $smarty = new Smarty();
 $smarty->setTemplateDir('./templates/');
 $smarty->setCacheDir('./templates/cache/');
 $smarty->setCompileDir('./templates/compile/');
-// TODO reactivate when testing is done
-//$smarty->setCaching(Smarty::CACHING_LIFETIME_CURRENT);
+$smarty->setCaching(Smarty::CACHING_LIFETIME_CURRENT);
 
 
 // Retrieve the endpoint, graph and node
-$endpoint = $_GET["endpoint"];
 $graph = $_GET["graph"];
 $node = $_GET["node"];
 // Values MUST be provided
-if($endpoint == "") die();
 if($graph == "") die();
 if($node == "") die();
 
