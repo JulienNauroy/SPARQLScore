@@ -2,11 +2,12 @@
 require_once "libs/Smarty-3.1.16/libs/Smarty.class.php";
 require_once "libs/easyrdf-0.8.0/lib/EasyRdf.php";
 
+// header("Content-Type: text/json");
+header("Content-Type: text/plain");
+
 $config = require_once("config.inc.php");
 // This is the official endpoint
 $endpoint = $config->defaultEndpoint;
-
-header("Content-Type: text/json");
 
 // Initialize Smarty for caching purposes
 $smarty = new Smarty();
@@ -59,5 +60,6 @@ if(!$smarty->isCached('ajax_nodeData.tpl', $cacheID)) {
 	}
 }
 
-$smarty->assign('output', json_encode((array)$output));
+//$smarty->assign('output', json_encode((array)$output));
+$smarty->assign('output', $output->info);
 $smarty->display('ajax_testResults.tpl', $cacheID);

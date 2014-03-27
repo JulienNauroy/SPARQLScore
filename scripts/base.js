@@ -479,15 +479,16 @@ ResultsTable.prototype = {
 		content += "</div>";
 		*/
 		content += "<divclass='links'>";
-		content += '<a href="' + data.test.nodeId + '" target="_blank">Click here to get to the original test</a>';
+		content += '<a href="' + data.test.nodeId + '" target="_blank">View the original test suite</a>';
 		if(data.test.result == "FAILURE")
-			content += "<br /><br />Results:<br /><span id='currentOpenLink'>Loading. Please wait...</span>";
+			//content += "<br /><br />Results:<br /><span id='currentOpenLink'>Loading. Please wait...</span>";
+			content += "<br /><br />Results:<br /><a href='ajax_testResultNode.php?graph="+encodeURIComponent(this.graph)+"&node="+encodeURIComponent(data.test.nodeId)+"' target='_blank'>View the errors</a>";
 		content += "</div>";
 
 		
 		// Retrieve the node's error info with an AJAX query
-		if(data.test.result == "FAILURE")
-			this.downloadTestResultNodeInfo(data.test.nodeId);
+		//if(data.test.result == "FAILURE")
+		//	this.downloadTestResultNodeInfo(data.test.nodeId);
 
 		this.panel = document.createElement('div');
 		this.panel.className = 'linksPanel popupPanel pointsLeft';
@@ -497,7 +498,7 @@ ResultsTable.prototype = {
 	
 	downloadTestResultNodeInfo: function(nodeId) {
 		//send request
-		var URL = "ajax_testResultNode.php?endpoint="+encodeURIComponent(this.endpoint)+"&graph="+encodeURIComponent(this.graph)+"&node="+encodeURIComponent(nodeId);
+		var URL = "ajax_testResultNode.php?graph="+encodeURIComponent(this.graph)+"&node="+encodeURIComponent(nodeId);
 
 		var req = new XMLHttpRequest();
 		req.open("GET", URL, true); 
@@ -508,6 +509,7 @@ ResultsTable.prototype = {
 						messageWaiting = "Error while retrieving data";
 						return;
 					}
+					console.log(req.responseText);
 					// Retrieve the results and update the popup
 					result = JSON.parse(req.responseText);
 					document.getElementById('currentOpenLink').innerHTML = result.info;

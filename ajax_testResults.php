@@ -1,6 +1,7 @@
 <?php
 require_once "libs/Smarty-3.1.16/libs/Smarty.class.php";
 require_once "libs/easyrdf-0.8.0/lib/EasyRdf.php";
+
 header("Content-Type: text/json");
 
 $config = require_once("config.inc.php");
@@ -56,12 +57,12 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 		GRAPH <$graph> {
 			?service a sd:Service ;
 					sd:server ?server ;
-					sd:testedBy ?tester  .
+					sd:testedBy ?tester .
 			?server git:name ?serverName ;
 					git:describeTag ?serverVersion ;
 					git:describe ?serverVersionBuild .
 			?tester  git:name ?testerName ;
-					git:describeTag ?testerVersion  .
+					git:describeTag ?testerVersion .
 		}
 	}
 	");

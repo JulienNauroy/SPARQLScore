@@ -5,7 +5,14 @@ require_once "libs/easyrdf-0.8.0/lib/EasyRdf.php";
 $config = require_once("config.inc.php");
 // This is the official endpoint
 $endpoint = $config->defaultEndpoint;
-
+/*
+prefix sq: <http://sparqlscore.net/Score#> 
+prefix sd: <http://www.w3.org/ns/sparql-service-description#> 
+prefix git: <http://www.w3.org/ns/git#> 
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
+*/
+EasyRdf_Namespace::set('sq', 'http://sparqlscore.net/Score#');
 EasyRdf_Namespace::set('sd', 'http://www.w3.org/ns/sparql-service-description#');
 EasyRdf_Namespace::set('git', 'http://www.w3.org/ns/git#');
 EasyRdf_Namespace::set('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
@@ -14,40 +21,33 @@ $sparql = new EasyRdf_Sparql_Client($endpoint);
 
 // Retrieve the graphs containing a test suite
 $result = $sparql->query("
-prefix sq: <http://sparqlscore.net/Score#> 
-prefix sd: <http://www.w3.org/ns/sparql-service-description#> 
-prefix git: <http://www.w3.org/ns/git#> 
-prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 SELECT ?graph ?serverName ?serverVersion ?score ?total ?lastDate ?testerName ?testerVersion
 WHERE {
-GRAPH ?graph {
-      ?service a sd:Service ;
-              sd:server ?server ;
-              sd:testedBy ?tester ;
-              sd:testedDate ?lastDate.
-      ?server git:name ?serverName ;
-              git:describeTag ?serverVersion ;
-              git:describe ?serverVersionBuild .
-      ?tester  git:name ?testerName ;
-              git:describeTag ?testerVersion  .
-  ?service sq:scoreTest ?score .
-  ?service sq:totalTest ?total .
-
-
-   }
- {
-SELECT ?serverName ?serverVersion (Max(?date) AS ?lastDate)
-WHERE {
-GRAPH ?graph {
- ?service a sd:Service ;
-  sd:server ?server ;
-  sd:testedDate ?date.
-  ?server git:name ?serverName ;
-  git:describeTag ?serverVersion  .
-}
-} GROUP BY ?serverName ?serverVersion
- }
+	GRAPH ?graph {
+		?service a sd:Service ;
+		sd:server ?server ;
+		sd:testedBy ?tester ;
+		sd:testedDate ?lastDate.
+		?server git:name ?serverName ;
+		git:describeTag ?serverVersion ;
+		git:describe ?serverVersionBuild .
+		?tester  git:name ?testerName ;
+		git:describeTag ?testerVersion  .
+		?service sq:scoreTest ?score .
+		?service sq:totalTest ?total .
+	}
+	{
+		SELECT ?serverName ?serverVersion (Max(?date) AS ?lastDate)
+		WHERE {
+			GRAPH ?graph {
+				?service a sd:Service ;
+				sd:server ?server ;
+				sd:testedDate ?date .
+				?server git:name ?serverName ;
+				git:describeTag ?serverVersion .
+			}
+		} GROUP BY ?serverName ?serverVersion
+	}
 } 
 ORDER BY DESC(?score) ?date ?serverName
 ");
