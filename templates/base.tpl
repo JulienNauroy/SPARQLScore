@@ -98,6 +98,7 @@
 									Sponsors: <br />
 									<a href="http://www.inria.fr"><img src="images/inriauk.png" alt="Inria" height="80" /></a>
 									<a href="http://www.grid-observatory.org"><img src="images/gridobs.png" alt="The Grid Observatory" height="80" /></a>
+									<img src="images/cds.png" alt="Center for Data Science, University Paris Saclay" height="80" /></a>
 								</p>
 							</div>
 						</div>
