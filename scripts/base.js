@@ -175,6 +175,9 @@ var ResultsTable = function() { this.initialize.apply(this, arguments) };
 ResultsTable.prototype = {
 
 	initialize: function(options) {
+
+	  
+	  
 		this.parent = options.parent;
 		this.endpoint = options.endpoint;
 		this.graph = options.graph;
@@ -190,6 +193,48 @@ ResultsTable.prototype = {
 			explainations:	options.explainations || false,
 
 			onChange:		options.onChange || false
+		}
+		
+		//SORTS
+		this.tests.sort(function (a, b) {
+		    if (a.name > b.name)
+		      return 1;
+		    if (a.name < b.name)
+		      return -1;
+		    // a doit être égale à b
+		    return 0;
+		});
+		
+		for(var key1 in this.tests){
+		  this.tests[key1].items.sort(function (a, b) {
+			if (a.name > b.name)
+			  return 1;
+			if (a.name < b.name)
+			  return -1;
+			// a doit être égale à b
+			return 0;
+		    });
+		  for(var key2 in this.tests[key1].items){
+		    this.tests[key1].items[key2].items.sort(function (a, b) {
+			  if (a.name > b.name)
+			    return 1;
+			  if (a.name < b.name)
+			    return -1;
+			  // a doit être égale à b
+			  return 0;
+		      });
+		    for(var key3 in  this.tests[key1].items[key2].items){
+			this.tests[key1].items[key2].items[key3].items.sort(function (a, b) {
+			      if (a.name > b.name)
+				return 1;
+			      if (a.name < b.name)
+				return -1;
+			      // a doit être égale à b
+			      return 0;
+			  });
+		    }
+		  }
+
 		}
 
 		this.panel = null;
