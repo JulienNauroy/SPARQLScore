@@ -13,6 +13,7 @@ $smarty = new Smarty();
 $smarty->setTemplateDir('./templates/');
 $smarty->setCacheDir('./templates/cache/');
 $smarty->setCompileDir('./templates/compile/');
+//$smarty->setCaching(Smarty::CACHING_OFF);
 $smarty->setCaching(Smarty::CACHING_LIFETIME_CURRENT);
 
 
@@ -126,9 +127,12 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 		?assertion rdf:label ?assertionName ;
 		           earl:outcome ?outcome.
 	} WHERE {
-		$tsSubquery
-	}
+		 $tsSubquery
+	} 
 	";
+        //echo $queryStr;
+	//exit();
+	
 	// Run the query and retrieve the test results
 	$result = $sparql->query($queryStr);
 
