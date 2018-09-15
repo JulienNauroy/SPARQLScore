@@ -348,27 +348,26 @@ ResultsTable.prototype = {
 			if (typeof testCases[i] != 'string') {
 				var row = document.getElementById('row-' + (parentTest == null ? '' : parentTest.id + '-') + testSuite.id + '-' + testCases[i].id);
 				var cell = row.childNodes[column + 1];
-
 				// If there are subtests, evaluate them
-				if (typeof testCases[i].items != 'undefined') {
-					var results = this.updateItems(column, testCases[i], testSuite);
-					// The results can be all OK, at least one failure, or partial pass
-					if (results[0] == results[1])
-						cell.innerHTML = '<div>' + 'Pass' + ' <span class="check">✔</span></div>';
-					else if (results[1] == 0)
-						cell.innerHTML = '<div>' + 'Fail' + ' <span class="ballot">✘</span></div>';
-					else
-						cell.innerHTML = '<div><span class="partially">' + 'Partial' + '</span> <span class="partial">○</span></div>';
-				} else {
-					switch(testCases[i].result) {
-						case 'PASS': cell.innerHTML = '<div>' + 'Pass' + ' <span class="check">✔</span></div>'; count[1]++; break;
-						case 'FAILURE': cell.innerHTML = '<div>' + 'Fail' + ' <span class="ballot">✘</span></div>'; break;
-						case 'SKIPPED': cell.innerHTML = '<div>' + 'Skipped' + ' <span class="partial">?</span></div>'; break;
-						case 'ERROR': cell.innerHTML = '<div>' + 'Error' + ' <span class="buggy">!</span></div>'; break;
-						default: cell.innerHTML = '<div><span class="partially">' + 'Unknown' + '</span> <span class="partial">?</span></div>'; break;
-					}
-				}
-				count[0]++;
+				    if (typeof testCases[i].items != 'undefined') {
+					    var results = this.updateItems(column, testCases[i], testSuite);
+					    // The results can be all OK, at least one failure, or partial pass
+					    if (results[0] == results[1])
+						    cell.innerHTML = '<div>' + 'Pass' + ' <span class="check">✔</span></div>';
+					    else if (results[1] == 0)
+						    cell.innerHTML = '<div>' + 'Fail' + ' <span class="ballot">✘</span></div>';
+					    else
+						    cell.innerHTML = '<div><span class="partially">' + 'Partial' + '</span> <span class="partial">○</span></div>';
+				    } else {
+					    switch(testCases[i].result) {
+						    case 'PASS': cell.innerHTML = '<div>' + 'Pass' + ' <span class="check">✔</span></div>'; count[1]++; break;
+						    case 'FAILURE': cell.innerHTML = '<div>' + 'Fail' + ' <span class="ballot">✘</span></div>'; break;
+						    case 'SKIPPED': cell.innerHTML = '<div>' + 'Skipped' + ' <span class="partial">?</span></div>'; break;
+						    case 'ERROR': cell.innerHTML = '<div>' + 'Error' + ' <span class="buggy">!</span></div>'; break;
+						    default: cell.innerHTML = '<div><span class="partially">' + 'Unknown' + '</span> <span class="partial">?</span></div>'; break;
+					    }
+				    }
+				    count[0]++;
 			}
 		}
 
@@ -440,8 +439,8 @@ ResultsTable.prototype = {
 	},
 
 	createItems: function(parent, level, tests, data) {
+	  	
 		var ids = [];
-
 		for (var i = 0; i < tests.length; i++) {
 			var tr = document.createElement('tr');
 			parent.appendChild(tr);
@@ -474,11 +473,25 @@ ResultsTable.prototype = {
 				if (typeof tests[i].items != 'undefined') {
 
 					tr.className += 'hasChild';
+					
+					//Comment
+					/*var trComment = document.createElement('tr');
+					parent.appendChild(trComment);
+					var thComment = document.createElement('th');
+					thComment.innerHTML = "<div><span>..</span></div>";
+					trComment.appendChild(th);
+					trComment.className = 'isChild';
+					trComment.style.display = 'table-row';
+					thComment.className = 'hasLink';
+					thComment.colSpan = 2;
+					trComment.id = 'row-' + data.id + '-comment';
+					*/
 
 					var children = this.createItems(parent, level + 1, tests[i].items, {
 						id: 	data.id + '-' + tests[i].id,
 						nodeId:	tests[i].nodeId
-					});
+					});					
+					//children.push(trComment.id);
 
 					this.hideChildren(tr, children);
 
@@ -507,7 +520,7 @@ ResultsTable.prototype = {
 
 		return ids;
 	},
-
+	
 	showResult: function(parent, data) {
 		if (this.panel) {
 			this.panel.parentNode.removeChild(this.panel);
@@ -522,10 +535,20 @@ ResultsTable.prototype = {
 		content += "<div class='column middle" + (data.value ? '' : ' none') + "'><em>" + ( data.value || '✘' ) + "</em> <span>" + (data.value != 1 ? 'Points' : 'Point') + "</span></div>";
 		content += "<div class='column right'><a href='/compare/feature/" + data.id +".html' class='compare'><span>" + 'Compare' + "</span></a></div>";
 		content += "</div>";
+		
+http://www.w3.org/2009/sparql/docs/tests/summary.html#entailment-bind07
+http://www.w3.org/2009/sparql/docs/tests/data-sparql11/entailment/manifest#bind07/Response
+
+content += '<a href="' + data.test.nodeId.replace((@^http://www.w3.org/2009/sparql/docs/tests/data-sparql11/([^/]*)/manifest#([^/#]*)/[^/]*$@), "http://www.w3.org/2009/sparql/docs/tests/summary.html#$1-$2") + '" target="_blank">View the original test suite</a>';
+		content += '<a href="' + data.test.nodeId.replace((@^http://www.w3.org/2009/sparql/docs/tests/data-sparql11/([^/]*)/manifest#([^/#]*)/[^/]*$@), "http://www.w3.org/2009/sparql/docs/tests/summary.html#$1-$2") + '" target="_blank">View the original test suite</a>';
+		
+		
 		*/
 		content += "<divclass='links'>";
 		content += '<a href="' + data.test.nodeId + '" target="_blank">View the original test suite</a>';
-		if(data.test.result == "FAILURE")
+		//content += '<a href="' + data.test.nodeId.replace((@^http://www.w3.org/2009/sparql/docs/tests/data-sparql11/([^/]*)/manifest#([^/#]*)/[^/]*$@), "http://www.w3.org/2009/sparql/docs/tests/summary.html#$1-$2") + '" target="_blank">View the original test suite</a>';
+		
+		if(data.test.result == "FAILURE" || data.test.result == "ERROR")
 			//content += "<br /><br />Results:<br /><span id='currentOpenLink'>Loading. Please wait...</span>";
 			content += "<br /><br />Results:<br /><a href='ajax_testResultNode.php?graph="+encodeURIComponent(this.graph)+"&node="+encodeURIComponent(data.test.nodeId)+"' target='_blank'>View the errors</a>";
 		content += "</div>";

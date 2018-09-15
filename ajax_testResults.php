@@ -1,4 +1,11 @@
 <?php
+/*
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+header("Cache-Control: no-store, no-cache, must-revalidate"); // HTTP/1.1
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache"); // HTTP/1.0
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past*/
+
 require_once "libs/Smarty-3.1.16/libs/Smarty.class.php";
 require_once "libs/easyrdf-0.8.0/lib/EasyRdf.php";
 
@@ -84,7 +91,9 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 				# Find the name for this test suite
 				?manifestall a mf:Manifest ;
 					rdfs:label ?label ;
-					mf:include ?includes. # Only the global manifest has a mf:include predicate
+					#bug mf:include ?includes. # Only the global manifest has a mf:include predicate
+					mf:includedSpecifications ?includes.
+              ?includes rdf:rest*/rdf:first ?categoryIRI .
 				# Find the categories, their names and the associated tests
 				?categoryIRI rdfs:label ?categoryName ;
 					mf:conformanceRequirement ?list.
@@ -97,7 +106,7 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 				# Find all the tests and assertions
 				?assertion a earl:Assertion.
 				?assertion earl:test ?test.
-				?assertion rdf:label ?assertionName.
+				?assertion rdfs:label ?assertionName.
 				?assertion earl:result ?result.
 				?result earl:date ?date.
 				OPTIONAL {?result earl:duration ?duration.}
@@ -118,20 +127,20 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 		?manifestall a earl:testSuite ; # We've just invented this one
 		             rdfs:label ?label ;
 					 earl:testCategory ?categoryIRI. # This one too
-		?categoryIRI rdf:label ?categoryName ;
+		?categoryIRI rdfs:label ?categoryName ;
 		             earl:test ?test ;
 		             sq:totalTest ?totalTest ;
 		             sq:scoreTest ?score.
-		?test rdf:label ?testName ;
+		?test rdfs:label ?testName ;
 		      earl:assertion ?assertion.
-		?assertion rdf:label ?assertionName ;
+		?assertion rdfs:label ?assertionName ;
 		           earl:outcome ?outcome.
 	} WHERE {
 		 $tsSubquery
 	} 
 	";
-        //echo $queryStr;
-	//exit();
+   /* echo $queryStr;
+	exit();*/
 	
 	// Run the query and retrieve the test results
 	$result = $sparql->query($queryStr);
@@ -153,7 +162,7 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 		foreach($categories as $category) {
 			$currentCategory = new stdClass();
 			$currentCategory->id = $tsNode->id . "_category" . sizeof($tsNode->items);
-			$currentCategory->name = $category->getLiteral("rdf:label")->getValue();
+			$currentCategory->name = $category->getLiteral("rdfs:label")->getValue();
 			$currentCategory->items = array();
 			$tsNode->items[] = $currentCategory;
 
@@ -163,7 +172,7 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 			foreach($tests as $test) {
 				$testItem = new stdClass();
 				$testItem->id = $currentCategory->id . "_testItem" . sizeof($currentCategory->items);
-				$testItem->name = $test->getLiteral("rdf:label")->getValue();
+				$testItem->name = $test->getLiteral("rdfs:label")->getValue();
 				$testItem->items = array();
 
 				$assertions = $test->all("earl:assertion");
@@ -171,7 +180,7 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 					$testAssertion = new stdClass();
 					$testAssertion->id = $testItem->id . "_" . sizeof($testItem->items);
 					$testAssertion->nodeId = $assertion->getUri();
-					$testAssertion->name = $assertion->get("rdf:label")->getValue();
+					$testAssertion->name = $assertion->get("rdfs:label")->getValue();
 					switch($assertion->get("earl:outcome")) {
 						case "http://www.w3.org/ns/earl#passed":
 						case "earl:pass":
