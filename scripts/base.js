@@ -341,8 +341,8 @@ ResultsTable.prototype = {
 	// parentTest is needed only to identify the proper html element by id
 	updateItems: function(column, testSuite, parentTest) {
 		var testCases = testSuite.items;
-		// count[x,y]: x is the amount of tests; y the amount of successes
-		var count = [ 0, 0 ];
+		// count[nb,pass,failure,error,skipped]: nb is the amount of tests; pass the amount of successes, etc.
+		var count = [ 0, 0, 0, 0, 0];
 
 		for (var i = 0; i < testCases.length; i++) {
 			if (typeof testCases[i] != 'string') {
@@ -350,20 +350,29 @@ ResultsTable.prototype = {
 				var cell = row.childNodes[column + 1];
 				// If there are subtests, evaluate them
 				    if (typeof testCases[i].items != 'undefined') {
-					    var results = this.updateItems(column, testCases[i], testSuite);
+					    var resultsCount = this.updateItems(column, testCases[i], testSuite);
+					    var nbTests = resultsCount[0];
+                        		    var nbPass = resultsCount[1];
+                        		    var nbFailure = resultsCount[2];
+                        		    var nbError = resultsCount[3];
+                        		    var nbSkipped = resultsCount[4];
 					    // The results can be all OK, at least one failure, or partial pass
-					    if (results[0] == results[1])
+					    if (nbError > 0)
+						    cell.innerHTML = '<div>' + 'Error' + ' <span class="buggy">!</span></div>';
+					    else if (nbTests == nbSkipped)
+						    cell.innerHTML = '<div>' + 'Skipped' + ' <span class="check">?</span></div>';
+					    else if (nbTests == nbPass)
 						    cell.innerHTML = '<div>' + 'Pass' + ' <span class="check">✔</span></div>';
-					    else if (results[1] == 0)
+					    else if (nbTests == nbFailure)
 						    cell.innerHTML = '<div>' + 'Fail' + ' <span class="ballot">✘</span></div>';
 					    else
 						    cell.innerHTML = '<div><span class="partially">' + 'Partial' + '</span> <span class="partial">○</span></div>';
 				    } else {
 					    switch(testCases[i].result) {
 						    case 'PASS': cell.innerHTML = '<div>' + 'Pass' + ' <span class="check">✔</span></div>'; count[1]++; break;
-						    case 'FAILURE': cell.innerHTML = '<div>' + 'Fail' + ' <span class="ballot">✘</span></div>'; break;
-						    case 'SKIPPED': cell.innerHTML = '<div>' + 'Skipped' + ' <span class="partial">?</span></div>'; break;
-						    case 'ERROR': cell.innerHTML = '<div>' + 'Error' + ' <span class="buggy">!</span></div>'; break;
+						    case 'FAILURE': cell.innerHTML = '<div>' + 'Fail' + ' <span class="ballot">✘</span></div>'; count[2]++;break;
+						    case 'SKIPPED': cell.innerHTML = '<div>' + 'Skipped' + ' <span class="partial">?</span></div>'; count[4]++;break;
+						    case 'ERROR': cell.innerHTML = '<div>' + 'Error' + ' <span class="buggy">!</span></div>'; count[3]++;break;
 						    default: cell.innerHTML = '<div><span class="partially">' + 'Unknown' + '</span> <span class="partial">?</span></div>'; break;
 					    }
 				    }
@@ -545,14 +554,14 @@ content += '<a href="' + data.test.nodeId.replace((@^http://www.w3.org/2009/spar
 		
 		*/
 		content += "<divclass='links'>";
-		content += '<a href="' + data.test.nodeId + '" target="_blank">View the original test suite</a>';
-		//content += '<a href="' + data.test.nodeId.replace((@^http://www.w3.org/2009/sparql/docs/tests/data-sparql11/([^/]*)/manifest#([^/#]*)/[^/]*$@), "http://www.w3.org/2009/sparql/docs/tests/summary.html#$1-$2") + '" target="_blank">View the original test suite</a>';
-		
-		if(data.test.result == "FAILURE" || data.test.result == "ERROR")
+		if(data.test.result == "FAILURE" || data.test.result == "ERROR" || data.test.result == "SKIPPED") {
 			//content += "<br /><br />Results:<br /><span id='currentOpenLink'>Loading. Please wait...</span>";
-			content += "<br /><br />Results:<br /><a href='ajax_testResultNode.php?graph="+encodeURIComponent(this.graph)+"&node="+encodeURIComponent(data.test.nodeId)+"' target='_blank'>View the errors</a>";
-		content += "</div>";
-
+			content += "<a href='ajax_testResultNode.php?graph="+encodeURIComponent(this.graph)+"&node="+encodeURIComponent(data.test.nodeId)+"' target='_blank'>View the result</a>";
+            		content += "<br/><br/>";
+		}
+		content += '<a href="' + data.test.nodeId + '" target="_blank">View the manifest</a>';
+		//content += '<a href="' + data.test.nodeId.replace((@^http://www.w3.org/2009/sparql/docs/tests/data-sparql11/([^/]*)/manifest#([^/#]*)/[^/]*$@), "http://www.w3.org/2009/sparql/docs/tests/summary.html#$1-$2") + '" target="_blank">View the original test suite</a>';
+        	content += "</div>";
 		
 		// Retrieve the node's error info with an AJAX query
 		//if(data.test.result == "FAILURE")

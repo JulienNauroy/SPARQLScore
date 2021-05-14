@@ -6,8 +6,8 @@ return (object) array(
 	// This is the list of test suites
 	"defaultTestSuites" => array(
 		// "http://dev.grid-observatory.org/sparql11-test-suite/",
-		"http://w3c.github.io/rdf-tests/sparql11/data-sparql11/",
-		"http://bordercloud.github.io/TFT-tests/GO3/",
-		"http://bordercloud.github.io/TFT-tests/geosparql/",
+		"https://bordercloud.github.io/rdf-tests/sparql11/data-sparql11/",
+		"https://bordercloud.github.io/TFT-tests/geosparql/",
+		"https://bordercloud.github.io/TFT-tests/GO3/",
 	),
 );

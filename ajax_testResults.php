@@ -153,7 +153,8 @@ if(!$smarty->isCached('ajax_testResults.tpl', $cacheID)) {
 		$tsNode = new stdClass();
 		$tsNode->id = "testsuite" . $tsCount;
 		$tsNode->name = $testSuite->getLiteral("rdfs:label")->getValue();
-		$tsNode->column = ($tsCount % 2 == 0 ? "left" : "right");
+		//$tsNode->column = ($tsCount % 2 == 0 ? "left" : "right");
+		$tsNode->column = $tsCount > 0 ? "right" : "left";
 		$tsNode->items = array();
 
 		// List test categories inside this suite

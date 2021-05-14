@@ -10,7 +10,6 @@ if($endpoint == "") $endpoint = $config->defaultEndpoint;
 
 
 $smarty = new Smarty();
-// $smarty->caching = FALSE;
 $smarty->setTemplateDir('./templates/');
 $smarty->setCacheDir('./templates/cache/');
 $smarty->setCompileDir('./templates/compile/');
