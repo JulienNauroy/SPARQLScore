@@ -3,7 +3,8 @@ require_once "libs/Smarty-3.1.16/libs/Smarty.class.php";
 require_once "libs/easyrdf-0.8.0/lib/EasyRdf.php";
 
 // header("Content-Type: text/json");
-header("Content-Type: text/plain");
+//header("Content-Type: text/plain");
+header("Content-type: text/html; charset=utf-8");
 
 $config = require_once("config.inc.php");
 // This is the official endpoint
@@ -14,8 +15,8 @@ $smarty = new Smarty();
 $smarty->setTemplateDir('./templates/');
 $smarty->setCacheDir('./templates/cache/');
 $smarty->setCompileDir('./templates/compile/');
+//$smarty->setCaching(Smarty::CACHING_OFF);
 $smarty->setCaching(Smarty::CACHING_LIFETIME_CURRENT);
-
 
 // Retrieve the endpoint, graph and node
 $graph = $_GET["graph"];
@@ -62,4 +63,4 @@ if(!$smarty->isCached('ajax_nodeData.tpl', $cacheID)) {
 
 //$smarty->assign('output', json_encode((array)$output));
 $smarty->assign('output', $output->info);
-$smarty->display('ajax_testResults.tpl', $cacheID);
+$smarty->display('resultsNode.tpl', $cacheID);

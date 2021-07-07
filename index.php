@@ -1,4 +1,5 @@
 <?php
+
 require_once "libs/Smarty-3.1.16/libs/Smarty.class.php";
 $config = require_once("config.inc.php");
 
